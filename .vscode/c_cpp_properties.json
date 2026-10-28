@@ -1,0 +1,21 @@
+{
+    "configurations": [
+        {
+            "name": "Win32-GCC",
+            "includePath": [
+                "${workspaceFolder}/**",
+                "C:/tools/w64devkit/x86_64-w64-mingw32/include/**"
+            ],
+            "defines": [
+                "_DEBUG",
+                "UNICODE",
+                "_UNICODE"
+            ],
+            "compilerPath": "C:/tools/w64devkit/bin/g++.exe",
+            "cStandard": "c17",
+            "cppStandard": "c++20",
+            "intelliSenseMode": "windows-gcc-x64"
+        }
+    ],
+    "version": 4
+}

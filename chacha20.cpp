@@ -1,3 +1,10 @@
+// ============================================================================
+// Author: zedward856-spec
+// File: chacha20.cpp
+// Description: Custom 4-Letter ("Lucy") Stream XOR Encryption & Decryption Engine
+// Created: 2026-10-28
+// ============================================================================
+
 #include <bits/stdc++.h>
 #include <iomanip>
 #include <bit>

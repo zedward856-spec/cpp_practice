@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>ChaCha20 Quarter-Round Interactive Flow</title>
+<style>
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: #1e1e24;
+    color: #e0e0e0;
+    margin: 0;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  h1 { color: #58a6ff; margin-bottom: 4px; }
+  .subtitle { color: #8b949e; margin-bottom: 24px; font-size: 14px; }
+  .canvas {
+    display: grid;
+    grid-template-columns: repeat(4, 220px) 340px;
+    gap: 20px;
+    max-width: 1300px;
+  }
+  .card {
+    background: #252530;
+    border-radius: 8px;
+    padding: 16px;
+    border: 1px solid #333344;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  }
+  .card.a { border-top: 4px solid #58a6ff; }
+  .card.b { border-top: 4px solid #3fb950; }
+  .card.c { border-top: 4px solid #d29922; }
+  .card.d { border-top: 4px solid #bc8cff; }
+  .card.info { border-top: 4px solid #f85149; grid-row: span 4; }
+  .step-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: bold;
+    margin-bottom: 8px;
+    background: #30363d;
+    color: #c9d1d9;
+  }
+  code {
+    background: #161b22;
+    padding: 3px 6px;
+    border-radius: 4px;
+    font-family: Consolas, monospace;
+    color: #79c0ff;
+    display: block;
+    margin: 6px 0;
+  }
+  .desc { font-size: 12px; color: #8b949e; line-height: 1.4; }
+  .arrow { text-align: center; color: #58a6ff; font-weight: bold; font-size: 18px; }
+</style>
+</head>
+<body>
+<h1>ChaCha20 Quarter-Round Engine Flow</h1>
+<div class="subtitle">Inputs: 4 unsigned 32-bit words (128 bits) &bull; RFC 7539 / RFC 8439 Architecture</div>
+
+<div class="canvas">
+  <!-- Initial inputs -->
+  <div class="card a"><div class="step-badge">Word [a]</div><code>0x11111111</code><div class="desc">Accumulator 1</div></div>
+  <div class="card b"><div class="step-badge">Word [b]</div><code>0x01020304</code><div class="desc">Mixer / Rotator 1</div></div>
+  <div class="card c"><div class="step-badge">Word [c]</div><code>0x9b8d6f43</code><div class="desc">Accumulator 2</div></div>
+  <div class="card d"><div class="step-badge">Word [d]</div><code>0x01234567</code><div class="desc">Mixer / Rotator 2</div></div>
+  
+  <div class="card info">
+    <h3>Why ARX?</h3>
+    <p class="desc"><strong>A</strong>ddition mod 2<sup>32</sup> gives non-linearity through carry propagation.</p>
+    <p class="desc"><strong>R</strong>otation shifts bits across registers without memory access.</p>
+    <p class="desc"><strong>X</strong>OR provides linear mixing over GF(2).</p>
+    <hr style="border: 0; border-top: 1px solid #333344; margin: 16px 0;">
+    <h3>Rotations (16, 12, 8, 7)</h3>
+    <ul class="desc" style="padding-left: 18px;">
+      <li><strong>16</strong>: Half-word register swap</li>
+      <li><strong>12</strong>: Crosses 3 nibbles</li>
+      <li><strong>8</strong>: Full 1-byte lane shift</li>
+      <li><strong>7</strong>: Prime shift breaking alignments</li>
+    </ul>
+  </div>
+
+  <!-- Step 1 -->
+  <div class="card a"><div class="step-badge">Step 1.1</div><code>a += b;</code><div class="desc">Addition mod 2<sup>32</sup></div></div>
+  <div class="card b" style="opacity: 0.5;"><div class="desc">Unchanged</div></div>
+  <div class="card c" style="opacity: 0.5;"><div class="desc">Unchanged</div></div>
+  <div class="card d"><div class="step-badge">Step 1.2</div><code>d ^= a;<br>d = rotl(d, 16);</code><div class="desc">Fold a into d & rotate 16</div></div>
+
+  <!-- Step 2 -->
+  <div class="card a" style="opacity: 0.5;"><div class="desc">Unchanged</div></div>
+  <div class="card b"><div class="step-badge">Step 2.2</div><code>b ^= c;<br>b = rotl(b, 12);</code><div class="desc">Fold c into b & rotate 12<br><strong>All 4 words mixed!</strong></div></div>
+  <div class="card c"><div class="step-badge">Step 2.1</div><code>c += d;</code><div class="desc">Addition mod 2<sup>32</sup></div></div>
+  <div class="card d" style="opacity: 0.5;"><div class="desc">Unchanged</div></div>
+
+  <!-- Step 3 -->
+  <div class="card a"><div class="step-badge">Step 3.1</div><code>a += b;</code><div class="desc">Second addition round</div></div>
+  <div class="card b" style="opacity: 0.5;"><div class="desc">Unchanged</div></div>
+  <div class="card c" style="opacity: 0.5;"><div class="desc">Unchanged</div></div>
+  <div class="card d"><div class="step-badge">Step 3.2</div><code>d ^= a;<br>d = rotl(d, 8);</code><div class="desc">Fold a into d & rotate 8</div></div>
+
+  <!-- Step 4 -->
+  <div class="card a" style="opacity: 0.5;"><div class="desc">Unchanged</div></div>
+  <div class="card b"><div class="step-badge">Step 4.2</div><code>b ^= c;<br>b = rotl(b, 7);</code><div class="desc">Fold c into b & rotate 7</div></div>
+  <div class="card c"><div class="step-badge">Step 4.1</div><code>c += d;</code><div class="desc">Final addition pass</div></div>
+  <div class="card d" style="opacity: 0.5;"><div class="desc">Unchanged</div></div>
+
+  <!-- Outputs -->
+  <div class="card a"><div class="step-badge">Final [a]</div><code>0xea2a92f4</code><div class="desc">&check; RFC Verified</div></div>
+  <div class="card b"><div class="step-badge">Final [b]</div><code>0xcb1cf8ce</code><div class="desc">&check; RFC Verified</div></div>
+  <div class="card c"><div class="step-badge">Final [c]</div><code>0x4581472e</code><div class="desc">&check; RFC Verified</div></div>
+  <div class="card d"><div class="step-badge">Final [d]</div><code>0x5881c4bb</code><div class="desc">&check; RFC Verified</div></div>
+</div>
+</body>
+</html>

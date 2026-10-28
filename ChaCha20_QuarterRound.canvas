@@ -1,0 +1,344 @@
+{
+  "nodes": [
+    {
+      "id": "title",
+      "type": "text",
+      "text": "# ChaCha20 Quarter-Round (QR) Engine Flow\n**Inputs**: 4 words `(a, b, c, d)` of type `uint32_t` (128 bits total)\n**Core Operations**: **ARX** (Addition mod $2^{32}$, Rotation left $\\lll$, Bitwise XOR $\\oplus$)\n**Key Property**: Fully constant-time with rapid non-linear avalanche diffusion.",
+      "x": -450,
+      "y": -320,
+      "width": 1160,
+      "height": 160,
+      "color": "5"
+    },
+    {
+      "id": "in_a",
+      "type": "text",
+      "text": "### Word [a]\n**Test Vector**: `0x11111111`\n*Accumulator lane 1*",
+      "x": -450,
+      "y": -120,
+      "width": 240,
+      "height": 130,
+      "color": "5"
+    },
+    {
+      "id": "in_b",
+      "type": "text",
+      "text": "### Word [b]\n**Test Vector**: `0x01020304`\n*Mixer / rotator lane 1*",
+      "x": -150,
+      "y": -120,
+      "width": 240,
+      "height": 130,
+      "color": "4"
+    },
+    {
+      "id": "in_c",
+      "type": "text",
+      "text": "### Word [c]\n**Test Vector**: `0x9b8d6f43`\n*Accumulator lane 2*",
+      "x": 150,
+      "y": -120,
+      "width": 240,
+      "height": 130,
+      "color": "3"
+    },
+    {
+      "id": "in_d",
+      "type": "text",
+      "text": "### Word [d]\n**Test Vector**: `0x01234567`\n*Mixer / rotator lane 2*",
+      "x": 450,
+      "y": -120,
+      "width": 240,
+      "height": 130,
+      "color": "6"
+    },
+    {
+      "id": "step1_a",
+      "type": "text",
+      "text": "### Step 1.1: Add\n```cpp\na += b;\n```\n- Non-linear integer addition modulo $2^{32}$\n- Carry bits propagate diffusion upward",
+      "x": -450,
+      "y": 100,
+      "width": 250,
+      "height": 170,
+      "color": "5"
+    },
+    {
+      "id": "step1_d",
+      "type": "text",
+      "text": "### Step 1.2: XOR & Rotate 16\n```cpp\nd ^= a;\nd = std::rotl(d, 16);\n```\n- Folds modified $a$ into $d$\n- **16-bit rotation**: swaps high/low 16-bit halfwords",
+      "x": 450,
+      "y": 100,
+      "width": 260,
+      "height": 170,
+      "color": "6"
+    },
+    {
+      "id": "step2_c",
+      "type": "text",
+      "text": "### Step 2.1: Add\n```cpp\nc += d;\n```\n- Folds newly rotated $d$ into $c$\n- Non-linear carry generation",
+      "x": 150,
+      "y": 350,
+      "width": 250,
+      "height": 170,
+      "color": "3"
+    },
+    {
+      "id": "step2_b",
+      "type": "text",
+      "text": "### Step 2.2: XOR & Rotate 12\n```cpp\nb ^= c;\nb = std::rotl(b, 12);\n```\n- Folds $c$ into $b$\n- **12-bit rotation**: cross-nibble diffusion\n- ⭐ **All 4 words now contaminated!**",
+      "x": -150,
+      "y": 350,
+      "width": 260,
+      "height": 170,
+      "color": "4"
+    },
+    {
+      "id": "step3_a",
+      "type": "text",
+      "text": "### Step 3.1: Add\n```cpp\na += b;\n```\n- Re-mixes $a$ with updated $b$\n- Second non-linear mixing stage",
+      "x": -450,
+      "y": 600,
+      "width": 250,
+      "height": 170,
+      "color": "5"
+    },
+    {
+      "id": "step3_d",
+      "type": "text",
+      "text": "### Step 3.2: XOR & Rotate 8\n```cpp\nd ^= a;\nd = std::rotl(d, 8);\n```\n- Folds new $a$ into $d$\n- **8-bit rotation**: 1 full byte rotation\n- Diffuses bits across byte lanes",
+      "x": 450,
+      "y": 600,
+      "width": 260,
+      "height": 170,
+      "color": "6"
+    },
+    {
+      "id": "step4_c",
+      "type": "text",
+      "text": "### Step 4.1: Add\n```cpp\nc += d;\n```\n- Re-mixes $c$ with updated $d$\n- Final addition pass",
+      "x": 150,
+      "y": 850,
+      "width": 250,
+      "height": 170,
+      "color": "3"
+    },
+    {
+      "id": "step4_b",
+      "type": "text",
+      "text": "### Step 4.2: XOR & Rotate 7\n```cpp\nb ^= c;\nb = std::rotl(b, 7);\n```\n- Folds new $c$ into $b$\n- **7-bit rotation**: prime shift breaking bit alignments",
+      "x": -150,
+      "y": 850,
+      "width": 260,
+      "height": 170,
+      "color": "4"
+    },
+    {
+      "id": "out_a",
+      "type": "text",
+      "text": "### Final Word [a]\n`0xea2a92f4`\n*(RFC 7539 / 8439 Verified)*",
+      "x": -450,
+      "y": 1100,
+      "width": 240,
+      "height": 120,
+      "color": "5"
+    },
+    {
+      "id": "out_b",
+      "type": "text",
+      "text": "### Final Word [b]\n`0xcb1cf8ce`\n*(RFC 7539 / 8439 Verified)*",
+      "x": -150,
+      "y": 1100,
+      "width": 240,
+      "height": 120,
+      "color": "4"
+    },
+    {
+      "id": "out_c",
+      "type": "text",
+      "text": "### Final Word [c]\n`0x4581472e`\n*(RFC 7539 / 8439 Verified)*",
+      "x": 150,
+      "y": 1100,
+      "width": 240,
+      "height": 120,
+      "color": "3"
+    },
+    {
+      "id": "out_d",
+      "type": "text",
+      "text": "### Final Word [d]\n`0x5881c4bb`\n*(RFC 7539 / 8439 Verified)*",
+      "x": 450,
+      "y": 1100,
+      "width": 240,
+      "height": 120,
+      "color": "6"
+    },
+    {
+      "id": "matrix_info",
+      "type": "text",
+      "text": "## Matrix Application (16 Words)\nIn full ChaCha20, QR is called **80 times** (10 double-rounds):\n\n### 1. Column Rounds\n- `QR( 0,  4,  8, 12)`\n- `QR( 1,  5,  9, 13)`\n- `QR( 2,  6, 10, 14)`\n- `QR( 3,  7, 11, 15)`\n\n### 2. Diagonal Rounds\n- `QR( 0,  5, 10, 15)`\n- `QR( 1,  6, 11, 12)`\n- `QR( 2,  7,  8, 13)`\n- `QR( 3,  4,  9, 14)`\n\n### 3. Davies-Meyer Addition\n`State[i] += InitialState[i]`\nPrevents algebraic inversion!",
+      "x": 760,
+      "y": 100,
+      "width": 380,
+      "height": 450,
+      "color": "2"
+    },
+    {
+      "id": "rotation_magic",
+      "type": "text",
+      "text": "## Why (16, 12, 8, 7)?\n- **16**: Half word. Direct 16-bit register swap.\n- **12**: Nibble-and-a-half. Bit 0 moves to bit 12, crossing 3 nibbles.\n- **8**: Byte shift. Rotates byte lanes by 1 position.\n- **7**: Prime number. Misaligns with all 8/16/32 boundaries.\n\nTogether with additions mod $2^{32}$, these 4 constants produce the fastest known diffusion per CPU instruction without S-boxes.",
+      "x": 760,
+      "y": 600,
+      "width": 380,
+      "height": 380,
+      "color": "1"
+    }
+  ],
+  "edges": [
+    {
+      "id": "e_in_a_to_s1",
+      "fromNode": "in_a",
+      "fromSide": "bottom",
+      "toNode": "step1_a",
+      "toSide": "top"
+    },
+    {
+      "id": "e_in_b_to_s1",
+      "fromNode": "in_b",
+      "fromSide": "bottom",
+      "toNode": "step1_a",
+      "toSide": "top",
+      "label": "b adds into a"
+    },
+    {
+      "id": "e_s1_a_to_s1_d",
+      "fromNode": "step1_a",
+      "fromSide": "right",
+      "toNode": "step1_d",
+      "toSide": "left",
+      "label": "a xors into d"
+    },
+    {
+      "id": "e_in_d_to_s1_d",
+      "fromNode": "in_d",
+      "fromSide": "bottom",
+      "toNode": "step1_d",
+      "toSide": "top"
+    },
+    {
+      "id": "e_s1_d_to_s2_c",
+      "fromNode": "step1_d",
+      "fromSide": "bottom",
+      "toNode": "step2_c",
+      "toSide": "top",
+      "label": "d adds into c"
+    },
+    {
+      "id": "e_in_c_to_s2_c",
+      "fromNode": "in_c",
+      "fromSide": "bottom",
+      "toNode": "step2_c",
+      "toSide": "top"
+    },
+    {
+      "id": "e_s2_c_to_s2_b",
+      "fromNode": "step2_c",
+      "fromSide": "left",
+      "toNode": "step2_b",
+      "toSide": "right",
+      "label": "c xors into b"
+    },
+    {
+      "id": "e_in_b_to_s2_b",
+      "fromNode": "in_b",
+      "fromSide": "bottom",
+      "toNode": "step2_b",
+      "toSide": "top"
+    },
+    {
+      "id": "e_s1_a_to_s3_a",
+      "fromNode": "step1_a",
+      "fromSide": "bottom",
+      "toNode": "step3_a",
+      "toSide": "top"
+    },
+    {
+      "id": "e_s2_b_to_s3_a",
+      "fromNode": "step2_b",
+      "fromSide": "left",
+      "toNode": "step3_a",
+      "toSide": "top",
+      "label": "b adds into a"
+    },
+    {
+      "id": "e_s3_a_to_s3_d",
+      "fromNode": "step3_a",
+      "fromSide": "right",
+      "toNode": "step3_d",
+      "toSide": "left",
+      "label": "a xors into d"
+    },
+    {
+      "id": "e_s1_d_to_s3_d",
+      "fromNode": "step1_d",
+      "fromSide": "bottom",
+      "toNode": "step3_d",
+      "toSide": "top"
+    },
+    {
+      "id": "e_s3_d_to_s4_c",
+      "fromNode": "step3_d",
+      "fromSide": "left",
+      "toNode": "step4_c",
+      "toSide": "top",
+      "label": "d adds into c"
+    },
+    {
+      "id": "e_s2_c_to_s4_c",
+      "fromNode": "step2_c",
+      "fromSide": "bottom",
+      "toNode": "step4_c",
+      "toSide": "top"
+    },
+    {
+      "id": "e_s4_c_to_s4_b",
+      "fromNode": "step4_c",
+      "fromSide": "left",
+      "toNode": "step4_b",
+      "toSide": "right",
+      "label": "c xors into b"
+    },
+    {
+      "id": "e_s2_b_to_s4_b",
+      "fromNode": "step2_b",
+      "fromSide": "bottom",
+      "toNode": "step4_b",
+      "toSide": "top"
+    },
+    {
+      "id": "e_s3_a_to_out_a",
+      "fromNode": "step3_a",
+      "fromSide": "bottom",
+      "toNode": "out_a",
+      "toSide": "top"
+    },
+    {
+      "id": "e_s4_b_to_out_b",
+      "fromNode": "step4_b",
+      "fromSide": "bottom",
+      "toNode": "out_b",
+      "toSide": "top"
+    },
+    {
+      "id": "e_s4_c_to_out_c",
+      "fromNode": "step4_c",
+      "fromSide": "bottom",
+      "toNode": "out_c",
+      "toSide": "top"
+    },
+    {
+      "id": "e_s3_d_to_out_d",
+      "fromNode": "step3_d",
+      "fromSide": "bottom",
+      "toNode": "out_d",
+      "toSide": "top"
+    }
+  ]
+}

@@ -32,6 +32,8 @@ Practice repository for learning modern symmetric cryptography in C++20: stream 
 
 ## 🛠️ Quick Start & Classroom PC Reboot Recovery
 
+> 📖 **Next Session Guide**: See **[`SETUP_GUIDE.md`](SETUP_GUIDE.md)** for the full step-by-step reboot recovery checklist and your **Week 2 Mini-AES & SPN study roadmap**.
+
 Because this machine resets on every reboot, run this **single PowerShell command** after logging in to automatically install **w64devkit (GCC 16.2 + GDB)**, **Git**, **GitHub CLI**, **VS Code + C++ extensions**, configure `PATH`, clone this repository to your Desktop, and open VS Code in the repo:
 
 ```powershell

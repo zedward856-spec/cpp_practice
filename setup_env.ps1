@@ -83,9 +83,10 @@ if (-not (Test-Path $repoDir)) {
 }
 
 Set-Location $repoDir
-if (Test-Path $vscodeCmd) {
+$vscodeExe = "$env:LOCALAPPDATA\Programs\Microsoft VS Code\Code.exe"
+if (Test-Path $vscodeExe) {
     Write-Host "Launching VS Code in $repoDir..." -ForegroundColor Green
-    & $vscodeCmd $repoDir
+    Start-Process -FilePath $vscodeExe -ArgumentList "`"$repoDir`""
 }
 
 Write-Host "`n[READY] Environment setup complete in $repoDir!" -ForegroundColor Green

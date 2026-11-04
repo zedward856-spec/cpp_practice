@@ -1,15 +1,22 @@
 # Quick Git & GitHub Push Script
 $gh = "C:\Program Files\GitHub CLI\gh.exe"
 $git = "C:\Program Files\Git\cmd\git.exe"
+$env:PATH = "C:\Program Files\Git\cmd;C:\Program Files\GitHub CLI;$env:PATH"
 
 # Check authentication
 & $gh auth status
 if ($LASTEXITCODE -ne 0) {
-    Write-Host "`n[!] You are not logged in to GitHub yet." -ForegroundColor Yellow
-    Write-Host "Run the following command to authenticate:" -ForegroundColor Cyan
-    Write-Host "  gh auth login --web" -ForegroundColor White
-    exit 1
+    Write-Host "`n[!] You are not logged in to GitHub yet. Starting device login..." -ForegroundColor Yellow
+    & $gh auth login --web -h github.com -p https
+    if ($LASTEXITCODE -ne 0) {
+        exit 1
+    }
 }
+
+# Ensure Git uses GitHub CLI credentials and has identity configured
+& $gh auth setup-git
+& $git config --global user.name "zedward856-spec"
+& $git config --global user.email "zedward856-spec@users.noreply.github.com"
 
 Write-Host "Staging and committing any new changes..." -ForegroundColor Cyan
 & $git add .

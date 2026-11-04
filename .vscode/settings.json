@@ -4,8 +4,12 @@
     "code-runner.saveFileBeforeRun": true,
     "code-runner.runInTerminal": true,
     "code-runner.executorMap": {
-        "cpp": "cd $dir && C:\\tools\\w64devkit\\bin\\g++.exe -std=c++20 -O2 $fileName -o $fileNameWithoutExt.exe && .\\$fileNameWithoutExt.exe"
+        "cpp": "cd $dir && C:\\tools\\w64devkit\\bin\\g++.exe -std=c++20 -O2 -Wall $fileName -o $fileNameWithoutExt.exe && .\\$fileNameWithoutExt.exe"
     },
     "C_Cpp.default.compilerPath": "C:/tools/w64devkit/bin/g++.exe",
-    "C_Cpp.default.cppStandard": "c++20"
+    "C_Cpp.default.cppStandard": "c++20",
+    "C_Cpp.default.intelliSenseMode": "windows-gcc-x64",
+    "terminal.integrated.env.windows": {
+        "PATH": "C:\\tools\\w64devkit\\bin;C:\\Program Files\\Git\\cmd;C:\\Program Files\\GitHub CLI;${env:PATH}"
+    }
 }

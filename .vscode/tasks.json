@@ -7,14 +7,19 @@
             "command": "C:/tools/w64devkit/bin/g++.exe",
             "args": [
                 "-std=c++20",
-                "-O2",
-                "-g",
+                "-O0",
+                "-g3",
+                "-Wall",
+                "-Wextra",
                 "${file}",
                 "-o",
                 "${fileDirname}/${fileBasenameNoExtension}.exe"
             ],
             "options": {
-                "cwd": "${fileDirname}"
+                "cwd": "${fileDirname}",
+                "env": {
+                    "PATH": "C:\\tools\\w64devkit\\bin;${env:PATH}"
+                }
             },
             "problemMatcher": [
                 "$gcc"
@@ -23,7 +28,49 @@
                 "kind": "build",
                 "isDefault": true
             },
-            "detail": "Compiles current C++ file with GCC 16.2 using C++20 standard."
+            "detail": "Compiles current C++ file with w64devkit GCC using C++20 standard and debug symbols."
+        },
+        {
+            "type": "shell",
+            "label": "C/C++: Build & Run Active File",
+            "command": "powershell",
+            "args": [
+                "-NoProfile",
+                "-ExecutionPolicy",
+                "Bypass",
+                "-Command",
+                "C:/tools/w64devkit/bin/g++.exe -std=c++20 -O2 -Wall \"${file}\" -o \"${fileDirname}/${fileBasenameNoExtension}.exe\"; if ($LASTEXITCODE -eq 0) { & \"${fileDirname}/${fileBasenameNoExtension}.exe\" }"
+            ],
+            "options": {
+                "cwd": "${fileDirname}",
+                "env": {
+                    "PATH": "C:\\tools\\w64devkit\\bin;${env:PATH}"
+                }
+            },
+            "problemMatcher": [
+                "$gcc"
+            ],
+            "group": "test",
+            "detail": "Builds and immediately runs the currently open C++ file."
+        },
+        {
+            "type": "shell",
+            "label": "Lab Runner: Run All Labs (run.ps1 all)",
+            "command": "powershell",
+            "args": [
+                "-NoProfile",
+                "-ExecutionPolicy",
+                "Bypass",
+                "-File",
+                "${workspaceFolder}/run.ps1",
+                "all"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "problemMatcher": [],
+            "group": "test",
+            "detail": "Compiles and runs all ChaCha20 and Mini-AES / SPN lab modules."
         }
     ]
 }

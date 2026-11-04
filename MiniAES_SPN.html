@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Mini-AES &amp; SPN (Substitution-Permutation Network) Flow</title>
+<style>
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: #1e1e24;
+    color: #e0e0e0;
+    margin: 0;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  h1 { color: #58a6ff; margin-bottom: 4px; }
+  .subtitle { color: #8b949e; margin-bottom: 24px; font-size: 14px; }
+  .canvas {
+    display: grid;
+    grid-template-columns: repeat(4, 220px) 340px;
+    gap: 20px;
+    max-width: 1300px;
+  }
+  .card {
+    background: #252530;
+    border-radius: 8px;
+    padding: 16px;
+    border: 1px solid #333344;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  }
+  .card.s0 { border-top: 4px solid #58a6ff; }
+  .card.s1 { border-top: 4px solid #3fb950; }
+  .card.s2 { border-top: 4px solid #d29922; }
+  .card.s3 { border-top: 4px solid #bc8cff; }
+  .card.info { border-top: 4px solid #f85149; grid-row: span 6; }
+  .step-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: bold;
+    margin-bottom: 8px;
+    background: #30363d;
+    color: #c9d1d9;
+  }
+  code {
+    background: #161b22;
+    padding: 3px 6px;
+    border-radius: 4px;
+    font-family: Consolas, monospace;
+    color: #79c0ff;
+    display: block;
+    margin: 6px 0;
+  }
+  .desc { font-size: 12px; color: #8b949e; line-height: 1.4; }
+  table.sbox {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 8px;
+    font-family: Consolas, monospace;
+    font-size: 11px;
+  }
+  table.sbox th, table.sbox td {
+    border: 1px solid #333344;
+    padding: 3px;
+    text-align: center;
+  }
+  table.sbox th { background: #161b22; color: #58a6ff; }
+</style>
+</head>
+<body>
+<h1>Mini-AES &amp; SPN (Substitution-Permutation Network) Flow</h1>
+<div class="subtitle">16-Bit State (4 Nibbles in 2&times;2 Matrix over GF(2<sup>4</sup>)) &bull; Plaintext <code>0x9C63</code> &bull; Key <code>0xC3F0</code></div>
+
+<div class="canvas">
+  <!-- Initial State + AddRoundKey K0 -->
+  <div class="card s0"><div class="step-badge">Nibble s<sub>0</sub> (Row 0, Col 0)</div><code>P=0x9 ^ K0=0xC = 0x5</code><div class="desc">Pre-whitening Key XOR</div></div>
+  <div class="card s1"><div class="step-badge">Nibble s<sub>1</sub> (Row 1, Col 0)</div><code>P=0xC ^ K0=0x3 = 0xF</code><div class="desc">Pre-whitening Key XOR</div></div>
+  <div class="card s2"><div class="step-badge">Nibble s<sub>2</sub> (Row 0, Col 1)</div><code>P=0x6 ^ K0=0xF = 0x9</code><div class="desc">Pre-whitening Key XOR</div></div>
+  <div class="card s3"><div class="step-badge">Nibble s<sub>3</sub> (Row 1, Col 1)</div><code>P=0x3 ^ K0=0x0 = 0x3</code><div class="desc">Pre-whitening Key XOR</div></div>
+
+  <div class="card info">
+    <h3>Why SPN? (Shannon's Principles)</h3>
+    <p class="desc"><strong>1. Confusion (Substitution / S-Box):</strong> Hides the relationship between the key and the ciphertext using a highly non-linear lookup table.</p>
+    <p class="desc"><strong>2. Diffusion (Permutation / ShiftRow + MixColumn):</strong> Spreads single-nibble changes across the entire 16-bit block.</p>
+    <hr style="border: 0; border-top: 1px solid #333344; margin: 14px 0;">
+    <h3>4-Bit S-Box Lookup Table</h3>
+    <table class="sbox">
+      <tr><th>x</th><td>0</td><td>1</td><td>2</td><td>3</td><td>4</td><td>5</td><td>6</td><td>7</td></tr>
+      <tr><th>S[x]</th><td>E</td><td>4</td><td>D</td><td>1</td><td>2</td><td>F</td><td>B</td><td>8</td></tr>
+      <tr><th>x</th><td>8</td><td>9</td><td>A</td><td>B</td><td>C</td><td>D</td><td>E</td><td>F</td></tr>
+      <tr><th>S[x]</th><td>3</td><td>A</td><td>6</td><td>C</td><td>5</td><td>9</td><td>0</td><td>7</td></tr>
+    </table>
+    <hr style="border: 0; border-top: 1px solid #333344; margin: 14px 0;">
+    <h3>GF(2<sup>4</sup>) MixColumn Matrix</h3>
+    <code>c'<sub>0</sub> = (3 &otimes; c<sub>0</sub>) &oplus; (2 &otimes; c<sub>1</sub>)<br>c'<sub>1</sub> = (2 &otimes; c<sub>0</sub>) &oplus; (3 &otimes; c<sub>1</sub>)</code>
+    <p class="desc">Arithmetic modulo irreducible polynomial <em>x</em><sup>4</sup> + <em>x</em> + 1 (<code>0x13</code>). Self-inverting!</p>
+  </div>
+
+  <!-- Round 1: NibbleSub -->
+  <div class="card s0"><div class="step-badge">R1.1 NibbleSub (&gamma;)</div><code>S[0x5] &rarr; 0xF</code><div class="desc">Non-linear 4-bit S-Box</div></div>
+  <div class="card s1"><div class="step-badge">R1.1 NibbleSub (&gamma;)</div><code>S[0xF] &rarr; 0x7</code><div class="desc">Non-linear 4-bit S-Box</div></div>
+  <div class="card s2"><div class="step-badge">R1.1 NibbleSub (&gamma;)</div><code>S[0x9] &rarr; 0xA</code><div class="desc">Non-linear 4-bit S-Box</div></div>
+  <div class="card s3"><div class="step-badge">R1.1 NibbleSub (&gamma;)</div><code>S[0x3] &rarr; 0x1</code><div class="desc">Non-linear 4-bit S-Box</div></div>
+
+  <!-- Round 1: ShiftRow -->
+  <div class="card s0"><div class="step-badge">R1.2 ShiftRow (&pi;)</div><code>s<sub>0</sub> = 0xF</code><div class="desc">Row 0 unchanged</div></div>
+  <div class="card s1"><div class="step-badge">R1.2 ShiftRow (&pi;)</div><code>s<sub>1</sub> &larr; s<sub>3</sub> = 0x1</code><div class="desc">Swapped with s<sub>3</sub> across columns!</div></div>
+  <div class="card s2"><div class="step-badge">R1.2 ShiftRow (&pi;)</div><code>s<sub>2</sub> = 0xA</code><div class="desc">Row 0 unchanged</div></div>
+  <div class="card s3"><div class="step-badge">R1.2 ShiftRow (&pi;)</div><code>s<sub>3</sub> &larr; s<sub>1</sub> = 0x7</code><div class="desc">Swapped with s<sub>1</sub> across columns!</div></div>
+
+  <!-- Round 1: MixColumn + AddRoundKey K1 -->
+  <div class="card s0"><div class="step-badge">R1.3 MixCol + K<sub>1</sub></div><code>0x0 ^ K1(0x3) = 0x3</code><div class="desc">Col 0 mixed in GF(2<sup>4</sup>)</div></div>
+  <div class="card s1"><div class="step-badge">R1.3 MixCol + K<sub>1</sub></div><code>0xE ^ K1(0x0) = 0xE</code><div class="desc">Col 0 mixed in GF(2<sup>4</sup>)</div></div>
+  <div class="card s2"><div class="step-badge">R1.3 MixCol + K<sub>1</sub></div><code>0x3 ^ K1(0xF) = 0xC</code><div class="desc">Col 1 mixed in GF(2<sup>4</sup>)</div></div>
+  <div class="card s3"><div class="step-badge">R1.3 MixCol + K<sub>1</sub></div><code>0xE ^ K1(0xF) = 0x1</code><div class="desc">Col 1 mixed in GF(2<sup>4</sup>)</div></div>
+
+  <!-- Round 2: NibbleSub + ShiftRow (No MixColumn in Final Round!) -->
+  <div class="card s0"><div class="step-badge">R2 NibbleSub + ShiftRow</div><code>S[0x3] &rarr; 0x1</code><div class="desc">Final Round (No MixColumn)</div></div>
+  <div class="card s1"><div class="step-badge">R2 NibbleSub + ShiftRow</div><code>S[0x1] &rarr; 0x4 (swapped)</code><div class="desc">From s<sub>3</sub> after ShiftRow</div></div>
+  <div class="card s2"><div class="step-badge">R2 NibbleSub + ShiftRow</div><code>S[0xC] &rarr; 0x5</code><div class="desc">Final Round (No MixColumn)</div></div>
+  <div class="card s3"><div class="step-badge">R2 NibbleSub + ShiftRow</div><code>S[0xE] &rarr; 0x0 (swapped)</code><div class="desc">From s<sub>1</sub> after ShiftRow</div></div>
+
+  <!-- Final Ciphertext -->
+  <div class="card s0"><div class="step-badge">Final C<sub>0</sub></div><code>0x1 ^ K2(0x6) = 0x7</code><div class="desc">&check; Ciphertext 0x72C6</div></div>
+  <div class="card s1"><div class="step-badge">Final C<sub>1</sub></div><code>0x4 ^ K2(0x6) = 0x2</code><div class="desc">&check; Ciphertext 0x72C6</div></div>
+  <div class="card s2"><div class="step-badge">Final C<sub>2</sub></div><code>0x5 ^ K2(0x9) = 0xC</code><div class="desc">&check; Ciphertext 0x72C6</div></div>
+  <div class="card s3"><div class="step-badge">Final C<sub>3</sub></div><code>0x0 ^ K2(0x6) = 0x6</code><div class="desc">&check; Ciphertext 0x72C6</div></div>
+</div>
+</body>
+</html>

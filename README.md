@@ -32,7 +32,7 @@ Practice repository for learning modern symmetric cryptography in C++20: stream 
 
 ## 🛠️ Quick Start & Classroom PC Reboot Recovery
 
-Because this machine resets on every reboot, run this **single PowerShell command** after logging in to automatically install **w64devkit (GCC 16.2 + GDB)**, **Git**, **GitHub CLI**, configure `PATH`, and clone this repository to your Desktop:
+Because this machine resets on every reboot, run this **single PowerShell command** after logging in to automatically install **w64devkit (GCC 16.2 + GDB)**, **Git**, **GitHub CLI**, **VS Code + C++ extensions**, configure `PATH`, clone this repository to your Desktop, and open VS Code in the repo:
 
 ```powershell
 irm https://raw.githubusercontent.com/zedward856-spec/cpp_practice/main/setup_env.ps1 | iex
